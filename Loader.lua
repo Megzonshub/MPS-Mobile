@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Key
-local correctKey = game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt")
+local correctKey = string.gsub(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt"), "%s+", "")
 
 -- GUI erstellen
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
