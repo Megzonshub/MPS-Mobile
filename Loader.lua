@@ -1,52 +1,52 @@
--- Megzons MPS | Sicherer Mobile-Loader mit Key-System
+-- Megzons MPS Key-Loader (OHNE Rayfield, 100% Handy-kompatibel)
 local HttpService = game:GetService("HttpService")
-local keyStorage = "MegzonshubMPS_Key_Used"
-local savedKey = getgenv()[keyStorage]
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
+-- Key
+local correctKey = game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt")
 
-local function loadMain()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
-end
+-- GUI erstellen
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "MegzonsKeyGui"
 
-if savedKey then
-    loadMain()
-    return
-end
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
 
-local Window = Rayfield:CreateWindow({
-	Name = "Megzons MPS",
-	LoadingTitle = "Key benötigt",
-	LoadingSubtitle = "Bitte gib den Key ein",
-	ConfigurationSaving = {
-		Enabled = false,
-	},
-})
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 8)
 
-local Tab = Window:CreateTab("🔐 Key Login", 4483362458)
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Size = UDim2.new(0.8, 0, 0, 40)
+TextBox.Position = UDim2.new(0.1, 0, 0.25, 0)
+TextBox.PlaceholderText = "Key hier eingeben"
+TextBox.Text = ""
+TextBox.ClearTextOnFocus = false
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextScaled = true
 
-Tab:CreateParagraph({Title = "Key nötig", Content = "Gib unten deinen Key ein, um Megzons Script zu laden."})
+local Button = Instance.new("TextButton", Frame)
+Button.Size = UDim2.new(0.8, 0, 0, 35)
+Button.Position = UDim2.new(0.1, 0, 0.65, 0)
+Button.Text = "Bestätigen"
+Button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.TextScaled = true
 
-Tab:CreateInput({
-	Name = "Key eingeben",
-	PlaceholderText = "z. B. Megzonshubmps",
-	RemoveTextAfterFocusLost = false,
-	Callback = function(input)
-		local correctKey = game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt")
-		if input:lower() == correctKey:lower() then
-			Rayfield:Notify({
-				Title = "Key korrekt",
-				Content = "Lade Megzons Script...",
-				Duration = 4,
-			})
-			getgenv()[keyStorage] = true
-			loadMain()
-		else
-			Rayfield:Notify({
-				Title = "Falscher Key",
-				Content = "Versuch es nochmal.",
-				Duration = 4,
-			})
-		end
-	end,
-})
+-- Funktion bei Klick
+Button.MouseButton1Click:Connect(function()
+	if TextBox.Text:lower() == correctKey:lower() then
+		Button.Text = "Key korrekt!"
+		wait(1)
+		ScreenGui:Destroy()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
+	else
+		Button.Text = "Falscher Key!"
+		wait(1)
+		Button.Text = "Bestätigen"
+	end
+end)
