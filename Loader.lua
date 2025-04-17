@@ -1,58 +1,48 @@
--- Megzons MPS Loader mit Key-System (Delta/Handy ready)
+-- Megzons MPS | Loader mit einfachem One-Time-Key-System
 
-local function isKeyValid(key)
-	local correctKey = game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt")
-	return key == correctKey
+if not getgenv then
+    return warn("Dein Executor unterstützt keine Globals (getgenv).")
 end
 
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
-local hasKeyFile = pcall(function() readfile("megzon_key.txt") end)
+local HttpService = game:GetService("HttpService")
+local player = game.Players.LocalPlayer
+local keyStorage = "MegzonshubMPSKey_Used"
 
-if hasKeyFile then
-	local savedKey = readfile("megzon_key.txt")
-	if isKeyValid(savedKey) then
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
-		return
-	end
+-- Wenn der Key schon mal eingegeben wurde, skip direkt
+if getgenv()[keyStorage] then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
+    return
 end
 
-local Window = Rayfield:CreateWindow({
-	Name = "Megzons MPS | Key System",
-	LoadingTitle = "Megzons Hub",
-	LoadingSubtitle = "Authentifizierung...",
-	ConfigurationSaving = {
-		Enabled = false,
-	},
-})
+local function requestKey()
+    local input = tostring(game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Megzons MPS",
+        Text = "Bitte Key eingeben im Prompt",
+        Duration = 8
+    }))
 
-Rayfield:Notify({
-	Title = "Key benötigt!",
-	Content = "Bitte gib den Key ein, um fortzufahren.",
-	Duration = 6.5,
-	Image = nil,
-	Actions = {},
-})
+    local userKey = tostring(string.lower(HttpService:PromptAsync("Key erforderlich", "Gib deinen Zugangscode ein (nur einmal nötig):", "Megzonshubmps")))
+    return userKey
+end
 
-Rayfield:CreateInput({
-	Name = "Key eingeben",
-	PlaceholderText = "Key hier eingeben...",
-	RemoveTextAfterFocusLost = false,
-	Callback = function(Text)
-		if isKeyValid(Text) then
-			writefile("megzon_key.txt", Text)
-			Rayfield:Notify({
-				Title = "Erfolg!",
-				Content = "Key akzeptiert!",
-				Duration = 4,
-			})
-			wait(1)
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
-		else
-			Rayfield:Notify({
-				Title = "Fehler!",
-				Content = "Ungültiger Key.",
-				Duration = 4,
-			})
-		end
-	end,
-})
+local function isKeyValid(k)
+    local correctKey = game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/key.txt")
+    return string.lower(k) == string.lower(correctKey)
+end
+
+local function start()
+    local enteredKey = requestKey()
+    if isKeyValid(enteredKey) then
+        getgenv()[keyStorage] = true
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Reach.lua"))()
+    else
+        warn("Falscher Key.")
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Key falsch!",
+            Text = "Bitte Script erneut ausführen.",
+            Duration = 5
+        })
+    end
+end
+
+start()
