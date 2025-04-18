@@ -1,41 +1,59 @@
--- Megzons Stealth Reach Script (Konsole-Version)
--- Nutze: setreach(15–100) und setgk(15–100) in der Konsole
--- Sichtbar nur für dich – kein öffentlicher Chat!
+-- Megzons MPS Hidden Reach GUI
 
-print("Megzons Stealth Menu aktiviert!")
-print("Nutze die Befehle in der Executor-Konsole:")
-print("→ setreach(50)   -- für Fuß-Reach")
-print("→ setgk(70)      -- für GK-Reach")
-
--- Spieler & Charakter abrufen
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local char = lp.Character or lp.CharacterAdded:Wait()
+local foot = char:WaitForChild("RightFoot")
 
--- Funktion für Fuß-Reach
-function setreach(size)
-    if size < 15 or size > 100 then
-        print("Ungültiger Wert für Reach! (15–100 erlaubt)")
-        return
-    end
-    for _, part in pairs(char:GetChildren()) do
-        if part:IsA("BasePart") and part.Name == "RightFoot" then
-            part.Size = Vector3.new(0.5, 0.5, size)
-            print("Foot Reach auf "..size.." gesetzt.")
-        end
+local reachSize = 45 -- Startgröße
+
+local function removeOldHitbox()
+    if char:FindFirstChild("MegzonReach") then
+        char:FindFirstChild("MegzonReach"):Destroy()
     end
 end
 
--- Funktion für GK-Reach
-function setgk(size)
-    if size < 15 or size > 100 then
-        print("Ungültiger Wert für GK Reach! (15–100 erlaubt)")
-        return
-    end
-    for _, part in pairs(char:GetChildren()) do
-        if part:IsA("BasePart") and part.Name == "RightHand" then
-            part.Size = Vector3.new(size, 0.5, 0.5)
-            print("GK Reach auf "..size.." gesetzt.")
-        end
-    end
+local function createReachHitbox(size)
+    removeOldHitbox()
+    local reach = Instance.new("Part")
+    reach.Name = "MegzonReach"
+    reach.Size = Vector3.new(size, size, size)
+    reach.Transparency = 1
+    reach.Anchored = false
+    reach.CanCollide = false
+    reach.Massless = true
+    reach.Parent = char
+
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = reach
+    weld.Part1 = foot
+    weld.Parent = reach
 end
+
+createReachHitbox(reachSize)
+
+-- GUI erstellen
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+ScreenGui.ResetOnSpawn = false
+
+local button = Instance.new("TextButton", ScreenGui)
+button.Size = UDim2.new(0, 140, 0, 40)
+button.Position = UDim2.new(0.5, -70, 0.5, -20)
+button.Text = "Reach: " .. tostring(reachSize)
+button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextScaled = true
+button.Font = Enum.Font.GothamSemibold
+button.BorderSizePixel = 0
+button.Active = true
+button.Draggable = true
+
+button.MouseButton1Click:Connect(function()
+    reachSize = reachSize + 5
+    if reachSize > 100 then
+        reachSize = 15
+    end
+    button.Text = "Reach: " .. tostring(reachSize)
+    createReachHitbox(reachSize)
+    print("Bigfoot Reach auf", reachSize)
+end)
