@@ -1,52 +1,106 @@
--- Megzons Simple Reach GUI (funktioniert mit setReach)
+--// Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- setReach Funktion
-_G.setReach = function(value)
-    print("Setze Reach auf:", value)
-    -- Hier kannst du deine echte Reach-Logik einsetzen
+--// Load Rayfield
+loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
+local Window = Rayfield:CreateWindow({
+    Name = "MPS Mobile Reach GUI",
+    LoadingTitle = "Megzons Mobile Hub",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "MegzonsHub",
+        FileName = "MPSReach"
+    }
+})
+
+--// Variables
+local FootReachBox = nil
+local GKReachBox = nil
+local FootReach = 0
+local GKReach = 0
+local AntiAFKEnabled = false
+
+--// Functions
+local function createHitbox(name, color)
+    local part = Instance.new("Part")
+    part.Name = name
+    part.Anchored = true
+    part.CanCollide = false
+    part.Transparency = 1
+    part.Size = Vector3.new(5, 5, 5)
+    part.Color = color
+    part.Parent = workspace
+    return part
 end
 
--- GUI erstellen
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local TextBox = Instance.new("TextBox")
-local Button = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
-local UICorner2 = Instance.new("UICorner")
-local UICorner3 = Instance.new("UICorner")
+local function setReach(type, size)
+    if type == "Foot" then
+        FootReach = size
+        if not FootReachBox then
+            FootReachBox = createHitbox("FootHitbox", Color3.fromRGB(255, 0, 0))
+        end
+        FootReachBox.Size = Vector3.new(size, size, size)
+    elseif type == "GK" then
+        GKReach = size
+        if not GKReachBox then
+            GKReachBox = createHitbox("GKHitbox", Color3.fromRGB(0, 0, 255))
+        end
+        GKReachBox.Size = Vector3.new(size, size, size)
+    end
+end
 
-ScreenGui.Name = "MegzonsReachGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game:GetService("CoreGui")
+--// GUI
+local MainTab = Window:CreateTab("Reach", 4483362458)
 
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Frame.Position = UDim2.new(0.4, 0, 0.4, 0)
-Frame.Size = UDim2.new(0, 250, 0, 140)
-UICorner.Parent = Frame
+MainTab:CreateSlider({
+    Name = "Foot Reach",
+    Range = {1, 100},
+    Increment = 1,
+    Default = 0,
+    Callback = function(Value)
+        setReach("Foot", Value)
+    end,
+})
 
-TextBox.Parent = Frame
-TextBox.PlaceholderText = "Reach-Wert z.B. 30"
-TextBox.Text = ""
-TextBox.Position = UDim2.new(0.1, 0, 0.2, 0)
-TextBox.Size = UDim2.new(0, 200, 0, 40)
-TextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-UICorner2.Parent = TextBox
+MainTab:CreateSlider({
+    Name = "GK Reach",
+    Range = {1, 100},
+    Increment = 1,
+    Default = 0,
+    Callback = function(Value)
+        setReach("GK", Value)
+    end,
+})
 
-Button.Parent = Frame
-Button.Text = "Setze Reach"
-Button.Position = UDim2.new(0.1, 0, 0.6, 0)
-Button.Size = UDim2.new(0, 200, 0, 40)
-Button.BackgroundColor3 = Color3.fromRGB(80, 130, 180)
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-UICorner3.Parent = Button
+MainTab:CreateToggle({
+    Name = "Anti-AFK",
+    CurrentValue = false,
+    Callback = function(Value)
+        AntiAFKEnabled = Value
+    end,
+})
 
-Button.MouseButton1Click:Connect(function()
-    local input = tonumber(TextBox.Text)
-    if input then
-        _G.setReach(input)
-    else
-        warn("Ungültiger Reach-Wert")
+--// Render Loop
+RunService.RenderStepped:Connect(function()
+    Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    
+    local FootPart = Character:FindFirstChild("LeftFoot") or Character:FindFirstChild("RightFoot")
+    local GKPart = Character:FindFirstChild("RightHand") or Character:FindFirstChild("LeftHand")
+
+    if FootReachBox and FootPart then
+        FootReachBox.Position = FootPart.Position
+    end
+
+    if GKReachBox and GKPart then
+        GKReachBox.Position = GKPart.Position
+    end
+
+    if AntiAFKEnabled then
+        VirtualInputManager = game:GetService("VirtualInputManager")
+        VirtualInputManager:SendKeyEvent(true, "Space", false, game)
+        VirtualInputManager:SendKeyEvent(false, "Space", false, game)
     end
 end)
