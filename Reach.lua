@@ -99,7 +99,7 @@ RunService.RenderStepped:Connect(function()
     end
 
     if AntiAFKEnabled then
-        VirtualInputManager = game:GetService("VirtualInputManager")
+        local VirtualInputManager = game:GetService("VirtualInputManager")
         VirtualInputManager:SendKeyEvent(true, "Space", false, game)
         VirtualInputManager:SendKeyEvent(false, "Space", false, game)
     end
