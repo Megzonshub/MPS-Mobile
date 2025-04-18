@@ -1,59 +1,22 @@
--- Megzons MPS Hidden Reach GUI
+-- Megzons MPS Reach Test GUI (Einfach & sichtbar)
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local TextButton = Instance.new("TextButton")
+local UICorner2 = Instance.new("UICorner")
 
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local foot = char:WaitForChild("RightFoot")
-
-local reachSize = 45 -- Startgröße
-
-local function removeOldHitbox()
-    if char:FindFirstChild("MegzonReach") then
-        char:FindFirstChild("MegzonReach"):Destroy()
-    end
-end
-
-local function createReachHitbox(size)
-    removeOldHitbox()
-    local reach = Instance.new("Part")
-    reach.Name = "MegzonReach"
-    reach.Size = Vector3.new(size, size, size)
-    reach.Transparency = 1
-    reach.Anchored = false
-    reach.CanCollide = false
-    reach.Massless = true
-    reach.Parent = char
-
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = reach
-    weld.Part1 = foot
-    weld.Parent = reach
-end
-
-createReachHitbox(reachSize)
-
--- GUI erstellen
-local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+-- GUI Einstellungen
+ScreenGui.Name = "ReachGUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
 
-local button = Instance.new("TextButton", ScreenGui)
-button.Size = UDim2.new(0, 140, 0, 40)
-button.Position = UDim2.new(0.5, -70, 0.5, -20)
-button.Text = "Reach: " .. tostring(reachSize)
-button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.TextScaled = true
-button.Font = Enum.Font.GothamSemibold
-button.BorderSizePixel = 0
-button.Active = true
-button.Draggable = true
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Position = UDim2.new(0.35, 0, 0.4, 0)
+Frame.Size = UDim2.new(0, 220, 0, 100)
 
-button.MouseButton1Click:Connect(function()
-    reachSize = reachSize + 5
-    if reachSize > 100 then
-        reachSize = 15
-    end
-    button.Text = "Reach: " .. tostring(reachSize)
-    createReachHitbox(reachSize)
-    print("Bigfoot Reach auf", reachSize)
-end)
+UICorner.Parent = Frame
+
+TextButton.Parent = Frame
+TextButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+TextButton.Position = UDim2.new(0
