@@ -1,169 +1,158 @@
--- Megzons Mobile Hub - Ultimate MPS GUI (Custom GUI + Hitbox System)
+-- Megzons MPS Mobile Hub (Custom GUI Version)
+-- Features: Foot Reach (Hitbox), GK Reach, Arm Reach (Sliders), Aimbot, Powershot, Anti-Kick, Dragbarer Button, Transparenter Öffnungsbutton
+
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Mouse = LocalPlayer:GetMouse()
 
--- Create ScreenGui
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "MegzonsHub"
-gui.ResetOnSpawn = false
+-- GUI
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+screenGui.Name = "MegzonsGUI"
+screenGui.ResetOnSpawn = false
+
+-- Öffnungsbutton
+local openButton = Instance.new("TextButton")
+openButton.Name = "OpenButton"
+openButton.Text = "Megzonshub"
+openButton.Size = UDim2.new(0, 120, 0, 35)
+openButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+openButton.BackgroundTransparency = 0.2
+openButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.Parent = screenGui
+openButton.Active = true
+openButton.Draggable = true
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+mainFrame.Size = UDim2.new(0, 320, 0, 330)
+mainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
-mainFrame.Parent = gui
+mainFrame.Parent = screenGui
 
--- Drag Button
-local dragButton = Instance.new("TextButton")
-dragButton.Text = "Megzonshub"
-dragButton.Size = UDim2.new(0, 120, 0, 40)
-dragButton.Position = UDim2.new(0, 20, 0, 120)
-dragButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-dragButton.TextColor3 = Color3.new(1, 1, 1)
-dragButton.BackgroundTransparency = 0.2
-dragButton.Active = true
-dragButton.Draggable = true
-dragButton.Parent = gui
+-- Close Button
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.Parent = mainFrame
 
-dragButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = not mainFrame.Visible
-end)
+-- Tabs (Einfach)
+local tabLabel = Instance.new("TextLabel")
+tabLabel.Size = UDim2.new(1, 0, 0, 30)
+tabLabel.Position = UDim2.new(0, 0, 0, 0)
+tabLabel.Text = "Megzons MPS Hub"
+tabLabel.TextColor3 = Color3.new(1, 1, 1)
+tabLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+tabLabel.Parent = mainFrame
 
--- Tabs
-local tabs = {}
-local currentTab
+-- Foot Reach Slider
+local footSlider = Instance.new("TextBox")
+footSlider.PlaceholderText = "Foot Reach (1 - 30)"
+footSlider.Size = UDim2.new(0, 280, 0, 30)
+footSlider.Position = UDim2.new(0, 20, 0, 50)
+footSlider.Text = ""
+footSlider.ClearTextOnFocus = false
+footSlider.Parent = mainFrame
 
-local function createTab(name)
-	local button = Instance.new("TextButton")
-	button.Text = name
-	button.Size = UDim2.new(0, 100, 0, 30)
-	button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.Parent = mainFrame
+-- GK Reach
+local gkSlider = footSlider:Clone()
+gkSlider.PlaceholderText = "GK Reach (1 - 30)"
+gkSlider.Position = UDim2.new(0, 20, 0, 90)
+gkSlider.Parent = mainFrame
 
-	local tabFrame = Instance.new("Frame")
-	tabFrame.Size = UDim2.new(1, 0, 1, -40)
-	tabFrame.Position = UDim2.new(0, 0, 0, 40)
-	tabFrame.BackgroundTransparency = 1
-	tabFrame.Visible = false
-	tabFrame.Parent = mainFrame
+-- Arm Reach
+local armSlider = footSlider:Clone()
+armSlider.PlaceholderText = "Arm Reach (1 - 30)"
+armSlider.Position = UDim2.new(0, 20, 0, 130)
+armSlider.Parent = mainFrame
 
-	button.MouseButton1Click:Connect(function()
-		if currentTab then currentTab.Visible = false end
-		tabFrame.Visible = true
-		currentTab = tabFrame
-	end)
-
-	tabs[#tabs + 1] = button
-	return tabFrame
-end
-
--- Layout Tabs
-for i, btn in ipairs(tabs) do
-	btn.Position = UDim2.new(0, 100 * (i - 1), 0, 0)
-end
-
--- Reach Tab
-local reachTab = createTab("Reach")
-local function createSlider(parent, label, default, callback)
-	local slider = Instance.new("TextButton")
-	slider.Text = label .. ": " .. default
-	slider.Size = UDim2.new(0, 300, 0, 30)
-	slider.Position = UDim2.new(0, 50, 0, 10 + (#parent:GetChildren() * 35))
-	slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	slider.TextColor3 = Color3.new(1, 1, 1)
-	slider.Parent = parent
-
-	local value = default
-	slider.MouseButton1Click:Connect(function()
-		local input = tonumber(game:GetService("StarterGui"):PromptInput("Enter reach value (5–30):"))
-		if input and input >= 5 and input <= 30 then
-			value = input
-			slider.Text = label .. ": " .. input
-			callback(value)
-		end
-	end)
-end
-
-local function createHitbox(partName, size)
-	local part = Instance.new("Part", workspace)
-	part.Anchored = false
-	part.CanCollide = false
-	part.Size = Vector3.new(size, size, size)
-	part.Transparency = 0.8
-	part.Color = Color3.fromRGB(255, 0, 0)
-	part.Name = "ReachHitbox_" .. partName
-
-	RunService.RenderStepped:Connect(function()
-		if Character and Character:FindFirstChild(partName) then
-			part.CFrame = Character[partName].CFrame
-		end
-	end)
-end
-
-createSlider(reachTab, "Foot Reach", 15, function(value)
-	createHitbox("RightFoot", value)
-end)
-
-createSlider(reachTab, "Arm Reach", 15, function(value)
-	createHitbox("RightHand", value)
-end)
-
-createSlider(reachTab, "GK Reach", 15, function(value)
-	createHitbox("LeftHand", value)
-end)
-
--- Aimbot Tab
-local aimbotTab = createTab("Aimbot")
-local aimBtn = Instance.new("TextButton")
-aimBtn.Text = "Activate Aimbot"
-aimBtn.Size = UDim2.new(0, 200, 0, 40)
-aimBtn.Position = UDim2.new(0.5, -100, 0.3, 0)
-aimBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-aimBtn.TextColor3 = Color3.new(1, 1, 1)
-aimBtn.Parent = aimbotTab
-aimBtn.MouseButton1Click:Connect(function()
-	print("Aimbot aktiviert")
-	-- Hier dein Aimbot-Code
-end)
-
--- Powershot Tab
-local powerTab = createTab("Powershot")
+-- Powershot Button
 local powerBtn = Instance.new("TextButton")
 powerBtn.Text = "Activate Powershot"
-powerBtn.Size = UDim2.new(0, 200, 0, 40)
-powerBtn.Position = UDim2.new(0.5, -100, 0.3, 0)
+powerBtn.Size = UDim2.new(0, 280, 0, 30)
+powerBtn.Position = UDim2.new(0, 20, 0, 180)
 powerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 powerBtn.TextColor3 = Color3.new(1, 1, 1)
-powerBtn.Parent = powerTab
+powerBtn.Parent = mainFrame
+
+-- Aimbot Button
+local aimbotBtn = powerBtn:Clone()
+aimbotBtn.Text = "Activate Aimbot"
+aimbotBtn.Position = UDim2.new(0, 20, 0, 220)
+aimbotBtn.Parent = mainFrame
+
+-- Anti Kick Toggle
+local antiKickBtn = powerBtn:Clone()
+antiKickBtn.Text = "Toggle Anti-Kick"
+antiKickBtn.Position = UDim2.new(0, 20, 0, 260)
+antiKickBtn.Parent = mainFrame
+
+-- Funktion GUI öffnen/schließen
+openButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = true
+	openButton.Visible = false
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = false
+	openButton.Visible = true
+end)
+
+-- Funktion: Reach-Hitbox (unsichtbar)
+local function createHitbox(partName, size)
+	local char = LocalPlayer.Character
+	if not char then return end
+	local part = char:FindFirstChild(partName)
+	if not part then return end
+	if part:FindFirstChild("Hitbox") then part.Hitbox:Destroy() end
+
+	local hitbox = Instance.new("Part")
+	hitbox.Name = "Hitbox"
+	hitbox.Size = Vector3.new(size, size, size)
+	hitbox.Transparency = 0.8
+	hitbox.CanCollide = false
+	hitbox.Anchored = false
+	hitbox.Massless = true
+	hitbox.Parent = part
+	local weld = Instance.new("WeldConstraint", hitbox)
+	weld.Part0 = hitbox
+	weld.Part1 = part
+end
+
+-- Listeners
+footSlider.FocusLost:Connect(function()
+	local size = tonumber(footSlider.Text)
+	if size then createHitbox("RightFoot", size) end
+end)
+
+gkSlider.FocusLost:Connect(function()
+	local size = tonumber(gkSlider.Text)
+	if size then createHitbox("LeftFoot", size) end
+end)
+
+armSlider.FocusLost:Connect(function()
+	local size = tonumber(armSlider.Text)
+	if size then createHitbox("LeftHand", size) end
+end)
+
 powerBtn.MouseButton1Click:Connect(function()
-	print("Powershot aktiviert")
-	-- Hier dein Powershot-Code
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Powershot.lua"))()
 end)
 
--- Anti-Kick Tab
-local akTab = createTab("Anti-Kick")
-local akToggle = Instance.new("TextButton")
-akToggle.Text = "Anti-Kick: OFF"
-akToggle.Size = UDim2.new(0, 200, 0, 40)
-akToggle.Position = UDim2.new(0.5, -100, 0.3, 0)
-akToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-akToggle.TextColor3 = Color3.new(1, 1, 1)
-akToggle.Parent = akTab
-
-local akOn = false
-akToggle.MouseButton1Click:Connect(function()
-	akOn = not akOn
-	akToggle.Text = "Anti-Kick: " .. (akOn and "ON" or "OFF")
-	if akOn then
-		hookfunction(game:GetService("Players").LocalPlayer.Kick, function() end)
-	end
+aimbotBtn.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Aimbot.lua"))()
 end)
 
--- Show default tab
-tabs[1].MouseButton1Click:Fire()
+antiKickBtn.MouseButton1Click:Connect(function()
+	LocalPlayer.CharacterRemoving:Connect(function(char)
+		if char == LocalPlayer.Character then
+			wait(0.1)
+			LocalPlayer.Character = char
+		end
+	end)
+end)
