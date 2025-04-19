@@ -1,68 +1,40 @@
--- Megzons Custom GUI (Foot Reach v1)
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+-- Megzons Custom GUI (Final)
 
--- GUI erstellen
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "MegzonsGUI"
+-- Gui Setup local ScreenGui = Instance.new("ScreenGui") local Main = Instance.new("Frame") local Tabs = Instance.new("Frame") local ReachTab = Instance.new("TextButton") local AimbotTab = Instance.new("TextButton") local PowerTab = Instance.new("TextButton") local AntiTab = Instance.new("TextButton") local Title = Instance.new("TextLabel")
 
-local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 250, 0, 150)
-Frame.Position = UDim2.new(0.5, -125, 0.4, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BorderSizePixel = 0
-Frame.Name = "MainFrame"
-Frame.Active = true
-Frame.Draggable = true
+-- Tabs local ReachFrame = Instance.new("Frame") local AimbotFrame = Instance.new("Frame") local PowerFrame = Instance.new("Frame") local AntiFrame = Instance.new("Frame")
 
-local Title = Instance.new("TextLabel", Frame)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "Foot Reach"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Title.BorderSizePixel = 0
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 20
+-- GUI Design ScreenGui.Name = "MegzonsGUI" ScreenGui.Parent = game.CoreGui
 
-local Slider = Instance.new("TextBox", Frame)
-Slider.Position = UDim2.new(0, 10, 0, 50)
-Slider.Size = UDim2.new(0, 230, 0, 30)
-Slider.PlaceholderText = "Reichweite (1-30)"
-Slider.Text = ""
-Slider.ClearTextOnFocus = false
-Slider.Font = Enum.Font.SourceSans
-Slider.TextSize = 18
-Slider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Slider.TextColor3 = Color3.new(1, 1, 1)
+Main.Name = "Main" Main.Parent = ScreenGui Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30) Main.Position = UDim2.new(0.3, 0, 0.2, 0) Main.Size = UDim2.new(0, 300, 0, 320) Main.Active = true Main.Draggable = true
 
--- Unsichtbare Hitbox
-local function createHitbox()
-	local part = Instance.new("Part")
-	part.Anchored = false
-	part.CanCollide = false
-	part.Transparency = 1
-	part.Size = Vector3.new(2, 2, 2)
-	part.Name = "FootHitbox"
-	part.Parent = workspace
-	local weld = Instance.new("WeldConstraint", part)
-	weld.Part0 = part
-	weld.Part1 = character:WaitForChild("RightFoot") or character:FindFirstChild("Right Leg") or character:FindFirstChild("RightLowerLeg")
-	return part
-end
+Tabs.Name = "Tabs" Tabs.Parent = Main Tabs.Size = UDim2.new(1, 0, 0, 30) Tabs.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
-local hitbox = createHitbox()
+local function makeTab(name, position) local tab = Instance.new("TextButton") tab.Size = UDim2.new(0, 75, 1, 0) tab.Position = UDim2.new(0, position, 0, 0) tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40) tab.Text = name tab.TextColor3 = Color3.new(1, 1, 1) tab.Font = Enum.Font.SourceSansBold tab.TextSize = 14 tab.BorderSizePixel = 0 tab.Name = name .. "Tab" tab.Parent = Tabs return tab end
 
--- Verbindung zum Slider
-Slider.FocusLost:Connect(function(enterPressed)
-	if enterPressed then
-		local value = tonumber(Slider.Text)
-		if value and value >= 1 and value <= 30 then
-			hitbox.Size = Vector3.new(value, value, value)
-			print("Foot Reach gesetzt auf: " .. value)
-		else
-			Slider.Text = ""
-			Slider.PlaceholderText = "Nur Werte von 1-30!"
-		end
-	end
-end)
+ReachTab = makeTab("Reach", 0) AimbotTab = makeTab("Aimbot", 75) PowerTab = makeTab("Power", 150) AntiTab = makeTab("Anti", 225)
+
+local function makeContentFrame() local frame = Instance.new("Frame") frame.Size = UDim2.new(1, 0, 1, -30) frame.Position = UDim2.new(0, 0, 0, 30) frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35) frame.Visible = false frame.Parent = Main return frame end
+
+ReachFrame = makeContentFrame() AimbotFrame = makeContentFrame() PowerFrame = makeContentFrame() AntiFrame = makeContentFrame()
+
+local function showOnly(frame) for _, f in pairs({ReachFrame, AimbotFrame, PowerFrame, AntiFrame}) do f.Visible = false end frame.Visible = true end
+
+ReachTab.MouseButton1Click:Connect(function() showOnly(ReachFrame) end) AimbotTab.MouseButton1Click:Connect(function() showOnly(AimbotFrame) end) PowerTab.MouseButton1Click:Connect(function() showOnly(PowerFrame) end) AntiTab.MouseButton1Click:Connect(function() showOnly(AntiFrame) end)
+
+-- Reach Sliders local function makeReachSlider(label, default, callback) local box = Instance.new("TextBox") box.Size = UDim2.new(0, 250, 0, 30) box.Position = UDim2.new(0, 25, 0, 10 + (#ReachFrame:GetChildren() * 35)) box.BackgroundColor3 = Color3.fromRGB(50, 50, 50) box.Text = label .. ": " .. default box.TextColor3 = Color3.new(1,1,1) box.Font = Enum.Font.SourceSans box.TextSize = 16 box.Parent = ReachFrame box.FocusLost:Connect(function() local val = tonumber(box.Text:match("%d+")) if val then box.Text = label .. ": " .. val callback(val) end end) end
+
+makeReachSlider("Foot Reach", 10, function(val) print("[Reach] Foot Reach set to", val) end)
+
+makeReachSlider("GK Reach", 10, function(val) print("[Reach] GK Reach set to", val) end)
+
+makeReachSlider("Arm Reach", 10, function(val) print("[Reach] Arm Reach set to", val) end)
+
+-- Aimbot Button local aimbotBtn = Instance.new("TextButton") aimbotBtn.Size = UDim2.new(0, 250, 0, 30) aimbotBtn.Position = UDim2.new(0, 25, 0, 25) aimbotBtn.Text = "Enable Aimbot" aimbotBtn.TextColor3 = Color3.new(1,1,1) aimbotBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60) aimbotBtn.Parent = AimbotFrame aimbotBtn.MouseButton1Click:Connect(function() print("[Aimbot] Activated") end)
+
+-- PowerShot Button local powerBtn = Instance.new("TextButton") powerBtn.Size = UDim2.new(0, 250, 0, 30) powerBtn.Position = UDim2.new(0, 25, 0, 25) powerBtn.Text = "Activate Powershot" powerBtn.TextColor3 = Color3.new(1,1,1) powerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60) powerBtn.Parent = PowerFrame powerBtn.MouseButton1Click:Connect(function() print("[Powershot] Activated") end)
+
+-- Anti-Kick Toggle local antiBtn = Instance.new("TextButton") antiBtn.Size = UDim2.new(0, 250, 0, 30) antiBtn.Position = UDim2.new(0, 25, 0, 25) antiBtn.Text = "Toggle Anti-Kick" antiBtn.TextColor3 = Color3.new(1,1,1) antiBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60) antiBtn.Parent = AntiFrame antiBtn.MouseButton1Click:Connect(function() print("[Anti-Kick] Toggled") end)
+
+-- Initial visibility showOnly(ReachFrame) print("[Megzons GUI] Loaded")
+
