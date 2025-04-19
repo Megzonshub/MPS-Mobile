@@ -1,158 +1,106 @@
--- Megzons MPS Mobile Hub (Custom GUI Version)
--- Features: Foot Reach (Hitbox), GK Reach, Arm Reach (Sliders), Aimbot, Powershot, Anti-Kick, Dragbarer Button, Transparenter Öffnungsbutton
+-- Megzons MPS GUI (ohne Anti-Kick)
+-- Erstellt für Arceus X Neo | by ChatGPT & Megzonshub
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
 
--- GUI
-local screenGui = Instance.new("ScreenGui", game.CoreGui)
-screenGui.Name = "MegzonsGUI"
-screenGui.ResetOnSpawn = false
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.ResetOnSpawn = false
 
--- Öffnungsbutton
-local openButton = Instance.new("TextButton")
-openButton.Name = "OpenButton"
-openButton.Text = "Megzonshub"
-openButton.Size = UDim2.new(0, 120, 0, 35)
-openButton.Position = UDim2.new(0.05, 0, 0.5, 0)
-openButton.BackgroundTransparency = 0.2
-openButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-openButton.Parent = screenGui
-openButton.Active = true
-openButton.Draggable = true
+local MiniButton = Instance.new("TextButton", ScreenGui)
+MiniButton.Size = UDim2.new(0, 120, 0, 30)
+MiniButton.Position = UDim2.new(0.5, -60, 0, 100)
+MiniButton.BackgroundTransparency = 0.2
+MiniButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MiniButton.Text = "Megzonshub"
+MiniButton.TextColor3 = Color3.new(1, 1, 1)
+MiniButton.Active = true
+MiniButton.Draggable = true
 
--- Main Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 330)
-mainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false
-mainFrame.Parent = screenGui
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 350, 0, 300)
+Main.Position = UDim2.new(0.5, -175, 0.5, -150)
+Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Main.Visible = false
 
--- Close Button
-local closeButton = Instance.new("TextButton")
-closeButton.Text = "X"
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 5)
-closeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-closeButton.TextColor3 = Color3.new(1, 1, 1)
-closeButton.Parent = mainFrame
+local UIList = Instance.new("UIListLayout", Main)
+UIList.FillDirection = Enum.FillDirection.Vertical
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 5)
 
--- Tabs (Einfach)
-local tabLabel = Instance.new("TextLabel")
-tabLabel.Size = UDim2.new(1, 0, 0, 30)
-tabLabel.Position = UDim2.new(0, 0, 0, 0)
-tabLabel.Text = "Megzons MPS Hub"
-tabLabel.TextColor3 = Color3.new(1, 1, 1)
-tabLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-tabLabel.Parent = mainFrame
-
--- Foot Reach Slider
-local footSlider = Instance.new("TextBox")
-footSlider.PlaceholderText = "Foot Reach (1 - 30)"
-footSlider.Size = UDim2.new(0, 280, 0, 30)
-footSlider.Position = UDim2.new(0, 20, 0, 50)
-footSlider.Text = ""
-footSlider.ClearTextOnFocus = false
-footSlider.Parent = mainFrame
-
--- GK Reach
-local gkSlider = footSlider:Clone()
-gkSlider.PlaceholderText = "GK Reach (1 - 30)"
-gkSlider.Position = UDim2.new(0, 20, 0, 90)
-gkSlider.Parent = mainFrame
-
--- Arm Reach
-local armSlider = footSlider:Clone()
-armSlider.PlaceholderText = "Arm Reach (1 - 30)"
-armSlider.Position = UDim2.new(0, 20, 0, 130)
-armSlider.Parent = mainFrame
-
--- Powershot Button
-local powerBtn = Instance.new("TextButton")
-powerBtn.Text = "Activate Powershot"
-powerBtn.Size = UDim2.new(0, 280, 0, 30)
-powerBtn.Position = UDim2.new(0, 20, 0, 180)
-powerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-powerBtn.TextColor3 = Color3.new(1, 1, 1)
-powerBtn.Parent = mainFrame
-
--- Aimbot Button
-local aimbotBtn = powerBtn:Clone()
-aimbotBtn.Text = "Activate Aimbot"
-aimbotBtn.Position = UDim2.new(0, 20, 0, 220)
-aimbotBtn.Parent = mainFrame
-
--- Anti Kick Toggle
-local antiKickBtn = powerBtn:Clone()
-antiKickBtn.Text = "Toggle Anti-Kick"
-antiKickBtn.Position = UDim2.new(0, 20, 0, 260)
-antiKickBtn.Parent = mainFrame
-
--- Funktion GUI öffnen/schließen
-openButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = true
-	openButton.Visible = false
+MiniButton.MouseButton1Click:Connect(function()
+	Main.Visible = not Main.Visible
 end)
 
-closeButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	openButton.Visible = true
-end)
-
--- Funktion: Reach-Hitbox (unsichtbar)
-local function createHitbox(partName, size)
-	local char = LocalPlayer.Character
-	if not char then return end
-	local part = char:FindFirstChild(partName)
-	if not part then return end
-	if part:FindFirstChild("Hitbox") then part.Hitbox:Destroy() end
-
-	local hitbox = Instance.new("Part")
-	hitbox.Name = "Hitbox"
-	hitbox.Size = Vector3.new(size, size, size)
+-- Hitbox-Funktion
+function createHitbox(name, size, partName)
+	local hitbox = Instance.new("Part", workspace)
+	hitbox.Name = name
+	hitbox.Size = size
 	hitbox.Transparency = 0.8
-	hitbox.CanCollide = false
 	hitbox.Anchored = false
+	hitbox.CanCollide = false
 	hitbox.Massless = true
-	hitbox.Parent = part
-	local weld = Instance.new("WeldConstraint", hitbox)
-	weld.Part0 = hitbox
-	weld.Part1 = part
-end
+	hitbox.Shape = Enum.PartType.Ball
+	hitbox.Color = Color3.new(1, 1, 1)
 
--- Listeners
-footSlider.FocusLost:Connect(function()
-	local size = tonumber(footSlider.Text)
-	if size then createHitbox("RightFoot", size) end
-end)
-
-gkSlider.FocusLost:Connect(function()
-	local size = tonumber(gkSlider.Text)
-	if size then createHitbox("LeftFoot", size) end
-end)
-
-armSlider.FocusLost:Connect(function()
-	local size = tonumber(armSlider.Text)
-	if size then createHitbox("LeftHand", size) end
-end)
-
-powerBtn.MouseButton1Click:Connect(function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Powershot.lua"))()
-end)
-
-aimbotBtn.MouseButton1Click:Connect(function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Megzonshub/MPS-Mobile/main/Aimbot.lua"))()
-end)
-
-antiKickBtn.MouseButton1Click:Connect(function()
-	LocalPlayer.CharacterRemoving:Connect(function(char)
-		if char == LocalPlayer.Character then
-			wait(0.1)
-			LocalPlayer.Character = char
+	game:GetService("RunService").RenderStepped:Connect(function()
+		local char = Player.Character
+		if char and char:FindFirstChild(partName) then
+			hitbox.Position = char[partName].Position
 		end
 	end)
+end
+
+-- GUI Funktionen
+local function addSlider(title, default, min, max, callback)
+	local label = Instance.new("TextLabel", Main)
+	label.Size = UDim2.new(1, -10, 0, 20)
+	label.Text = title .. ": " .. tostring(default)
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.BackgroundTransparency = 1
+
+	local button = Instance.new("TextButton", Main)
+	button.Size = UDim2.new(1, -10, 0, 30)
+	button.Text = "Set " .. title
+	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	button.TextColor3 = Color3.new(1, 1, 1)
+
+	button.MouseButton1Click:Connect(function()
+		local val = tonumber(game:GetService("StarterGui"):PromptInput("Set " .. title .. " Reach", "Value from "..min.." to "..max)) or default
+		val = math.clamp(val, min, max)
+		label.Text = title .. ": " .. tostring(val)
+		callback(val)
+	end)
+end
+
+local function addButton(title, callback)
+	local btn = Instance.new("TextButton", Main)
+	btn.Size = UDim2.new(1, -10, 0, 30)
+	btn.Text = title
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.MouseButton1Click:Connect(callback)
+end
+
+-- Sliders & Buttons
+addSlider("Foot Reach", 15, 1, 30, function(val)
+	createHitbox("FootReach", Vector3.new(val, val, val), "RightFoot")
+end)
+
+addSlider("GK Reach", 15, 1, 30, function(val)
+	createHitbox("GKReach", Vector3.new(val, val, val), "LeftHand")
+end)
+
+addSlider("Arm Reach", 15, 1, 30, function(val)
+	createHitbox("ArmReach", Vector3.new(val, val, val), "RightHand")
+end)
+
+addButton("Activate Powershot", function()
+	print("Powershot activated!") -- Dein Powershot-Code hier
+end)
+
+addButton("Activate Aimbot", function()
+	print("Aimbot activated!") -- Dein Aimbot-Code hier
 end)
