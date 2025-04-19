@@ -1,53 +1,57 @@
--- Megzons MPS Reach GUI mit Rayfield (Mobilfreundlich)
-
+-- Lade Rayfield
 local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
 
+-- Erstelle GUI
 local Window = Rayfield:CreateWindow({
-   Name = "Megzons MPS Reach GUI",
-   LoadingTitle = "Megzons Hub",
-   LoadingSubtitle = "MPS Mobile Version",
+   Name = "Megzons Reach",
+   LoadingTitle = "Megzons Hub lädt...",
+   LoadingSubtitle = "by Megzonshub",
    ConfigurationSaving = {
       Enabled = false
-   }
+   },
+   Discord = {
+      Enabled = false
+   },
+   KeySystem = false,
 })
 
-local ReachTab = Window:CreateTab("Reach", 4483362458)
+-- Erstelle Tab
+local ReachTab = Window:CreateTab("Reach Settings", 4483362458)
 
-local reachValue = 10
-
-ReachTab:CreateInput({
-   Name = "Reach-Wert (z. B. 15)",
-   PlaceholderText = "Gib die Reichweite in Studs ein",
-   RemoveTextAfterFocusLost = false,
+-- Reach-Slider
+ReachTab:CreateSlider({
+   Name = "Foot Reach",
+   Range = {1, 30},
+   Increment = 1,
+   Suffix = "Studs",
+   CurrentValue = 10,
+   Flag = "FootReach",
    Callback = function(Value)
-      reachValue = tonumber(Value) or 10
+       -- Beispiel: Erhöhe Fußreichweite mit unsichtbarem Part
+       if _G.FootReachPart then
+           _G.FootReachPart.Size = Vector3.new(1, 1, Value)
+       end
    end,
 })
 
-ReachTab:CreateButton({
-   Name = "Aktiviere Reach",
-   Callback = function()
-      local player = game.Players.LocalPlayer
-      local char = player.Character or player.CharacterAdded:Wait()
+-- Beispielhafte Reach-Setup Funktion (du kannst das an dein Spiel anpassen)
+if not _G.FootReachPart then
+   local part = Instance.new("Part")
+   part.Size = Vector3.new(1, 1, 10)
+   part.Transparency = 1
+   part.CanCollide = false
+   part.Anchored = false
+   part.Parent = game.Workspace
+   _G.FootReachPart = part
 
-      if char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("RightFoot") then
-         local reachPart = Instance.new("Part")
-         reachPart.Name = "MegzonsReach"
-         reachPart.Anchored = false
-         reachPart.CanCollide = false
-         reachPart.Massless = true
-         reachPart.Size = Vector3.new(3, 3, 3)
-         reachPart.Transparency = 1
-         reachPart.Shape = Enum.PartType.Ball
-         reachPart.Parent = char
+   -- Beispiel: Folge dem rechten Fuß
+   local player = game.Players.LocalPlayer
+   local char = player.Character or player.CharacterAdded:Wait()
+   local foot = char:WaitForChild("RightFoot")
 
-         local weld = Instance.new("WeldConstraint")
-         weld.Part0 = char:FindFirstChild("RightFoot")
-         weld.Part1 = reachPart
-         weld.Parent = reachPart
-
-         reachPart.Position = char.RightFoot.Position
-         reachPart.Size = Vector3.new(reachValue, reachValue, reachValue)
-      end
-   end,
-})
+   game:GetService("RunService").RenderStepped:Connect(function()
+       if foot and _G.FootReachPart then
+           _G.FootReachPart.CFrame = foot.CFrame
+       end
+   end)
+end
