@@ -1,90 +1,55 @@
--- Megzons MPS GUI (Ohne Keysystem) für Arceus X Neo
-loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local character = lp.Character or lp.CharacterAdded:Wait()
 
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-local Window = Rayfield:CreateWindow({
-    Name = "Megzons MPS Hub",
-    LoadingTitle = "MPS Mobile",
-    LoadingSubtitle = "by Megzonshub",
-    ConfigurationSaving = {
-        Enabled = false,
-    }
-})
-
-local reachValues = {
-    Foot = 2,
-    GK = 2,
-    Arm = 2
+local reachParts = {
+    Foot = nil,
+    Arm = nil,
+    GK = nil
 }
 
--- Tab: Reach Settings
-local ReachTab = Window:CreateTab("Reach", 4483362458)
-ReachTab:CreateSlider({
-    Name = "Foot Reach",
-    Range = {1, 30},
-    Increment = 1,
-    CurrentValue = reachValues.Foot,
-    Callback = function(Value)
-        reachValues.Foot = Value
-    end,
-})
-ReachTab:CreateSlider({
-    Name = "GK Reach",
-    Range = {1, 30},
-    Increment = 1,
-    CurrentValue = reachValues.GK,
-    Callback = function(Value)
-        reachValues.GK = Value
-    end,
-})
-ReachTab:CreateSlider({
-    Name = "Arm Reach",
-    Range = {1, 30},
-    Increment = 1,
-    CurrentValue = reachValues.Arm,
-    Callback = function(Value)
-        reachValues.Arm = Value
-    end,
-})
-ReachTab:CreateButton({
-    Name = "Apply Reach",
-    Callback = function()
-        if setReach then
-            setReach(reachValues.Foot, reachValues.GK, reachValues.Arm)
-        else
-            warn("setReach-Funktion nicht gefunden")
-        end
-    end,
-})
+function createHitbox(name, size, followPart)
+    if reachParts[name] then
+        reachParts[name]:Destroy()
+    end
 
--- Tab: Aimbot
-Window:CreateTab("Aimbot", 4483362458):CreateToggle({
-    Name = "Aimbot aktivieren",
-    CurrentValue = false,
-    Callback = function(state)
-        print("Aimbot: ", state)
-    end,
-})
+    local hitbox = Instance.new("Part")
+    hitbox.Name = name .. "_ReachPart"
+    hitbox.Size = Vector3.new(size, size, size)
+    hitbox.Transparency = 1
+    hitbox.Anchored = false
+    hitbox.CanCollide = false
+    hitbox.Massless = true
+    hitbox.Parent = character
 
--- Tab: Powershot
-Window:CreateTab("Powershot", 4483362458):CreateToggle({
-    Name = "Powershot aktivieren",
-    CurrentValue = false,
-    Callback = function(state)
-        print("Powershot: ", state)
-    end,
-})
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = hitbox
+    weld.Part1 = followPart
+    weld.Parent = hitbox
 
--- Tab: Anti-Kick
-Window:CreateTab("Anti-Kick", 4483362458):CreateToggle({
-    Name = "Anti-Kick aktivieren",
-    CurrentValue = false,
-    Callback = function(state)
-        print("Anti-Kick: ", state)
-    end,
-})
+    hitbox.Position = followPart.Position
 
--- Dummy setReach Funktion (zum Testen – anpassen wenn du deine eigene hast)
-function setReach(foot, gk, arm)
-    print("Reach angewendet: Foot =", foot, "GK =", gk, "Arm =", arm)
+    reachParts[name] = hitbox
 end
+
+function setReach(part, value)
+    local char = lp.Character or lp.CharacterAdded:Wait()
+    if part == "Foot" then
+        local foot = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg")
+        if foot then
+            createHitbox("Foot", tonumber(value), foot)
+        end
+    elseif part == "Arm" then
+        local arm = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+        if arm then
+            createHitbox("Arm", tonumber(value), arm)
+        end
+    elseif part == "GK" then
+        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+        if torso then
+            createHitbox("GK", tonumber(value), torso)
+        end
+    end
+end
+
+print("Megzons Reach loaded")
