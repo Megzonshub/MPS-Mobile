@@ -1,106 +1,34 @@
--- Megzons MPS GUI (ohne Anti-Kick)
--- Erstellt für Arceus X Neo | by ChatGPT & Megzonshub
+--// Megzons Mobile Hub – Fix Version (Draggable + TextBox Input) //
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+local player = game.Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait() local mouse = player:GetMouse()
 
--- GUI Setup
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.ResetOnSpawn = false
+-- GUI local gui = Instance.new("ScreenGui", game.CoreGui) local openButton = Instance.new("TextButton") local mainFrame = Instance.new("Frame") local title = Instance.new("TextLabel") local footBox = Instance.new("TextBox") local armBox = Instance.new("TextBox") local gkBox = Instance.new("TextBox") local aimbotButton = Instance.new("TextButton") local powershotButton = Instance.new("TextButton") local antiKick = Instance.new("TextButton")
 
-local MiniButton = Instance.new("TextButton", ScreenGui)
-MiniButton.Size = UDim2.new(0, 120, 0, 30)
-MiniButton.Position = UDim2.new(0.5, -60, 0, 100)
-MiniButton.BackgroundTransparency = 0.2
-MiniButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MiniButton.Text = "Megzonshub"
-MiniButton.TextColor3 = Color3.new(1, 1, 1)
-MiniButton.Active = true
-MiniButton.Draggable = true
+-- GUI Styling gui.Name = "MegzonsHub" openButton.Size = UDim2.new(0, 120, 0, 30) openButton.Position = UDim2.new(0, 20, 0.5, -15) openButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) openButton.Text = "Megzonshub" openButton.TextColor3 = Color3.new(1, 1, 1) openButton.BackgroundTransparency = 0.2 openButton.Parent = gui openButton.Active = true openButton.Draggable = true
 
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 350, 0, 300)
-Main.Position = UDim2.new(0.5, -175, 0.5, -150)
-Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Main.Visible = false
+mainFrame.Size = UDim2.new(0, 300, 0, 300) mainFrame.Position = UDim2.new(0.5, -150, 0.5, -150) mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) mainFrame.Visible = false mainFrame.Parent = gui mainFrame.Active = true mainFrame.Draggable = true
 
-local UIList = Instance.new("UIListLayout", Main)
-UIList.FillDirection = Enum.FillDirection.Vertical
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 5)
+openButton.MouseButton1Click:Connect(function() mainFrame.Visible = not mainFrame.Visible end)
 
-MiniButton.MouseButton1Click:Connect(function()
-	Main.Visible = not Main.Visible
-end)
+title.Size = UDim2.new(1, 0, 0, 40) title.BackgroundColor3 = Color3.fromRGB(20, 20, 20) title.Text = "Megzons Mobile Hub" title.TextColor3 = Color3.new(1, 1, 1) title.Font = Enum.Font.SourceSansBold title.TextSize = 20 title.Parent = mainFrame
 
--- Hitbox-Funktion
-function createHitbox(name, size, partName)
-	local hitbox = Instance.new("Part", workspace)
-	hitbox.Name = name
-	hitbox.Size = size
-	hitbox.Transparency = 0.8
-	hitbox.Anchored = false
-	hitbox.CanCollide = false
-	hitbox.Massless = true
-	hitbox.Shape = Enum.PartType.Ball
-	hitbox.Color = Color3.new(1, 1, 1)
+local function createBox(name, posY) local box = Instance.new("TextBox") box.Size = UDim2.new(0.9, 0, 0, 30) box.Position = UDim2.new(0.05, 0, 0, posY) box.PlaceholderText = name .. " Reach" box.Text = "" box.TextColor3 = Color3.new(1, 1, 1) box.BackgroundColor3 = Color3.fromRGB(60, 60, 60) box.Font = Enum.Font.SourceSans box.TextSize = 16 box.ClearTextOnFocus = false box.Parent = mainFrame return box end
 
-	game:GetService("RunService").RenderStepped:Connect(function()
-		local char = Player.Character
-		if char and char:FindFirstChild(partName) then
-			hitbox.Position = char[partName].Position
-		end
-	end)
-end
+footBox = createBox("Foot", 50) armBox = createBox("Arm", 90) gkBox = createBox("GK", 130)
 
--- GUI Funktionen
-local function addSlider(title, default, min, max, callback)
-	local label = Instance.new("TextLabel", Main)
-	label.Size = UDim2.new(1, -10, 0, 20)
-	label.Text = title .. ": " .. tostring(default)
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.BackgroundTransparency = 1
+aimbotButton.Size = UDim2.new(0.9, 0, 0, 30) aimbotButton.Position = UDim2.new(0.05, 0, 0, 170) aimbotButton.Text = "Aimbot" aimbotButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80) aimbotButton.TextColor3 = Color3.new(1, 1, 1) aimbotButton.Parent = mainFrame
 
-	local button = Instance.new("TextButton", Main)
-	button.Size = UDim2.new(1, -10, 0, 30)
-	button.Text = "Set " .. title
-	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	button.TextColor3 = Color3.new(1, 1, 1)
+powershotButton.Size = UDim2.new(0.9, 0, 0, 30) powershotButton.Position = UDim2.new(0.05, 0, 0, 210) powershotButton.Text = "Powershot" powershotButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80) powershotButton.TextColor3 = Color3.new(1, 1, 1) powershotButton.Parent = mainFrame
 
-	button.MouseButton1Click:Connect(function()
-		local val = tonumber(game:GetService("StarterGui"):PromptInput("Set " .. title .. " Reach", "Value from "..min.." to "..max)) or default
-		val = math.clamp(val, min, max)
-		label.Text = title .. ": " .. tostring(val)
-		callback(val)
-	end)
-end
+antiKick.Size = UDim2.new(0.9, 0, 0, 30) antiKick.Position = UDim2.new(0.05, 0, 0, 250) antiKick.Text = "Anti Kick" antiKick.BackgroundColor3 = Color3.fromRGB(80, 80, 80) antiKick.TextColor3 = Color3.new(1, 1, 1) antiKick.Parent = mainFrame
 
-local function addButton(title, callback)
-	local btn = Instance.new("TextButton", Main)
-	btn.Size = UDim2.new(1, -10, 0, 30)
-	btn.Text = title
-	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.MouseButton1Click:Connect(callback)
-end
+-- Funktionale Logik function setFootReach(value) local foot = character:FindFirstChild("RightFoot") if foot and value then local hitbox = foot:FindFirstChild("FootHitbox") or Instance.new("Part", foot) hitbox.Name = "FootHitbox" hitbox.Size = Vector3.new(value, value, value) hitbox.Transparency = 0.8 hitbox.Anchored = false hitbox.CanCollide = false hitbox.Massless = true local weld = Instance.new("WeldConstraint") weld.Part0 = foot weld.Part1 = hitbox weld.Parent = hitbox end end
 
--- Sliders & Buttons
-addSlider("Foot Reach", 15, 1, 30, function(val)
-	createHitbox("FootReach", Vector3.new(val, val, val), "RightFoot")
-end)
+footBox.FocusLost:Connect(function(enter) if enter then local val = tonumber(footBox.Text) if val then setFootReach(val) end end end)
 
-addSlider("GK Reach", 15, 1, 30, function(val)
-	createHitbox("GKReach", Vector3.new(val, val, val), "LeftHand")
-end)
+-- Dummy Funktionen powershotButton.MouseButton1Click:Connect(function() print("Powershot aktiviert!") end)
 
-addSlider("Arm Reach", 15, 1, 30, function(val)
-	createHitbox("ArmReach", Vector3.new(val, val, val), "RightHand")
-end)
+aimbotButton.MouseButton1Click:Connect(function() print("Aimbot aktiviert!") end)
 
-addButton("Activate Powershot", function()
-	print("Powershot activated!") -- Dein Powershot-Code hier
-end)
+antiKick.MouseButton1Click:Connect(function() print("Anti-Kick aktiviert!") end)
 
-addButton("Activate Aimbot", function()
-	print("Aimbot activated!") -- Dein Aimbot-Code hier
-end)
