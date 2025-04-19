@@ -1,55 +1,90 @@
--- Megzons Reach GUI (Arceus X Neo kompatibel)
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local TextLabel = Instance.new("TextLabel")
-local ReachBox = Instance.new("TextBox")
-local SetButton = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
+-- Megzons MPS GUI (Ohne Keysystem) für Arceus X Neo
+loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.Name = "MegzonsReach"
-ScreenGui.ResetOnSpawn = false
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Window = Rayfield:CreateWindow({
+    Name = "Megzons MPS Hub",
+    LoadingTitle = "MPS Mobile",
+    LoadingSubtitle = "by Megzonshub",
+    ConfigurationSaving = {
+        Enabled = false,
+    }
+})
 
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 200, 0, 140)
-Frame.Position = UDim2.new(0.35, 0, 0.4, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-UICorner.Parent = Frame
+local reachValues = {
+    Foot = 2,
+    GK = 2,
+    Arm = 2
+}
 
-TextLabel.Parent = Frame
-TextLabel.Text = "Reach-Wert eingeben:"
-TextLabel.Size = UDim2.new(1, 0, 0, 30)
-TextLabel.BackgroundTransparency = 1
-TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.Font = Enum.Font.Gotham
-TextLabel.TextSize = 14
+-- Tab: Reach Settings
+local ReachTab = Window:CreateTab("Reach", 4483362458)
+ReachTab:CreateSlider({
+    Name = "Foot Reach",
+    Range = {1, 30},
+    Increment = 1,
+    CurrentValue = reachValues.Foot,
+    Callback = function(Value)
+        reachValues.Foot = Value
+    end,
+})
+ReachTab:CreateSlider({
+    Name = "GK Reach",
+    Range = {1, 30},
+    Increment = 1,
+    CurrentValue = reachValues.GK,
+    Callback = function(Value)
+        reachValues.GK = Value
+    end,
+})
+ReachTab:CreateSlider({
+    Name = "Arm Reach",
+    Range = {1, 30},
+    Increment = 1,
+    CurrentValue = reachValues.Arm,
+    Callback = function(Value)
+        reachValues.Arm = Value
+    end,
+})
+ReachTab:CreateButton({
+    Name = "Apply Reach",
+    Callback = function()
+        if setReach then
+            setReach(reachValues.Foot, reachValues.GK, reachValues.Arm)
+        else
+            warn("setReach-Funktion nicht gefunden")
+        end
+    end,
+})
 
-ReachBox.Parent = Frame
-ReachBox.PlaceholderText = "z.B. 30"
-ReachBox.Size = UDim2.new(0.8, 0, 0, 30)
-ReachBox.Position = UDim2.new(0.1, 0, 0.35, 0)
-ReachBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ReachBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-ReachBox.Font = Enum.Font.Gotham
-ReachBox.TextSize = 14
-UICorner:Clone().Parent = ReachBox
+-- Tab: Aimbot
+Window:CreateTab("Aimbot", 4483362458):CreateToggle({
+    Name = "Aimbot aktivieren",
+    CurrentValue = false,
+    Callback = function(state)
+        print("Aimbot: ", state)
+    end,
+})
 
-SetButton.Parent = Frame
-SetButton.Text = "SetReach"
-SetButton.Size = UDim2.new(0.8, 0, 0, 30)
-SetButton.Position = UDim2.new(0.1, 0, 0.7, 0)
-SetButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-SetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SetButton.Font = Enum.Font.GothamBold
-SetButton.TextSize = 14
-UICorner:Clone().Parent = SetButton
+-- Tab: Powershot
+Window:CreateTab("Powershot", 4483362458):CreateToggle({
+    Name = "Powershot aktivieren",
+    CurrentValue = false,
+    Callback = function(state)
+        print("Powershot: ", state)
+    end,
+})
 
--- Funktion zum Anwenden des Reach-Werts
-SetButton.MouseButton1Click:Connect(function()
-    local reach = tonumber(ReachBox.Text)
-    if reach and type(setReach) == "function" then
-        setReach(reach)
-    else
-        warn("Ungültiger Wert oder setReach nicht vorhanden.")
-    end
-end)
+-- Tab: Anti-Kick
+Window:CreateTab("Anti-Kick", 4483362458):CreateToggle({
+    Name = "Anti-Kick aktivieren",
+    CurrentValue = false,
+    Callback = function(state)
+        print("Anti-Kick: ", state)
+    end,
+})
+
+-- Dummy setReach Funktion (zum Testen – anpassen wenn du deine eigene hast)
+function setReach(foot, gk, arm)
+    print("Reach angewendet: Foot =", foot, "GK =", gk, "Arm =", arm)
+end
